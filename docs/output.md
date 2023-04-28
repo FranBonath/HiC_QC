@@ -1,4 +1,4 @@
-# fbo/hicqc: Output
+# HiC_QC: Output
 
 ## Introduction
 

@@ -1,4 +1,4 @@
-# fbo/hicqc: Citations
+# HiC_QC: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 

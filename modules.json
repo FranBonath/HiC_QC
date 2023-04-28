@@ -1,6 +1,6 @@
 {
-    "name": "fbo/hicqc",
-    "homePage": "https://github.com/fbo/hicqc",
+    "name": "HiC_QC",
+    "homePage": "https://github.com/HiC_QC",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

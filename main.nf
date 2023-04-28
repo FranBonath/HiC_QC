@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    fbo/hicqc
+    HiC_QC
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/fbo/hicqc
+    Github : https://github.com/HiC_QC
 ----------------------------------------------------------------------------------------
 */
 
@@ -26,7 +26,7 @@ WorkflowMain.initialise(workflow, params, log)
 include { HICQC } from './workflows/hicqc'
 
 //
-// WORKFLOW: Run main fbo/hicqc analysis pipeline
+// WORKFLOW: Run main HiC_QC analysis pipeline
 //
 workflow FBO_HICQC {
     HICQC ()

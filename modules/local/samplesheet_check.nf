@@ -17,7 +17,7 @@ process SAMPLESHEET_CHECK {
     when:
     task.ext.when == null || task.ext.when
 
-    script: // This script is bundled with the pipeline, in fbo/hicqc/bin/
+    script: // This script is bundled with the pipeline, in HiC_QC/bin/
     """
     check_samplesheet.py \\
         $samplesheet \\
