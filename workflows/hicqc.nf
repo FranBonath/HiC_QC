@@ -155,11 +155,11 @@ workflow HICQC {
     // MODULE: Run PT_STATS_TABLE
     //
 
-
+/*
     PT_STATS_TABLE (
         PAIRTOOLS_DEDUP.out.stat
     )
-  
+ */ 
 
 
     //
