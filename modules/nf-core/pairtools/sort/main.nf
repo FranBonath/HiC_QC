@@ -13,7 +13,7 @@ process PAIRTOOLS_SORT {
     tuple val(meta), path(input)
 
     output:
-    tuple val(meta), path("*.pairs.gz"), emit: sorted
+    tuple val(meta), path("*.sorted.pairs.gz"), emit: sorted
     path "versions.yml"                , emit: versions
 
     when:
@@ -29,7 +29,7 @@ process PAIRTOOLS_SORT {
         $args \\
         --nproc $task.cpus \\
         --memory "$mem" \\
-        -o ${prefix}.pairs.gz \\
+        -o ${prefix}.sorted.pairs.gz \\
         $input
 
     cat <<-END_VERSIONS > versions.yml
