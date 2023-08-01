@@ -11,7 +11,7 @@ process PAIRTOOLS_PARSE {
 
     input:
     tuple val(meta), path(bam)
-    tuple val(meta), path(chromsizes)
+    tuple val(meta2), path(chromsizes)
 
     output:
     tuple val(meta), path("*.pairsam.gz")  , emit: pairsam
