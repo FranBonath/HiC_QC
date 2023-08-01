@@ -11,11 +11,13 @@ WorkflowHicqc.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.fasta ]
+def checkPathParamList = [ params.input, params.multiqc_config, params.fasta, params.bwa_index]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+if (params.bwa_index) {ch_bwa_index = file(params.bwa_index)} else {exit 1, 'BWA index not specified!'}
+if (params.fasta) {ch_fasta = file(params.fasta)} else {exit 1, 'fasta file not specified!'}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +39,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
+include { PT_STATS_TABLE              } from '../modules/local/create_stats_table'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,8 +54,13 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 include { FASTQC                      } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { BWA_MEM } from '../modules/nf-core/bwa/mem/main'
-
+include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main'
+include { PAIRTOOLS_PARSE             } from '../modules/nf-core/pairtools/parse/main'
+include { PAIRTOOLS_SORT              } from '../modules/nf-core/pairtools/sort/main' 
+include { PAIRTOOLS_DEDUP             } from '../modules/nf-core/pairtools/dedup/main'
+include { BWA_MEM                     } from '../modules/nf-core/bwa/mem/main'
+include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main'
+include { FASTQ_ALIGN_BWA             } from '../subworkflows/nf-core/fastq_align_bwa/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -73,14 +81,86 @@ workflow HICQC {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+ 
+    //
+    // MODULE: Run BWA_INDEX
+    //
+ 
+    Channel 
+        .fromPath(ch_fasta)
+        .map { it -> ["[id:test_sample_T1, single_end:false]", [it]]}
+        .set { fasta_ch }
+
+    BWA_INDEX (
+        fasta_ch //    tuple val(meta), path(fasta)
+    )
 
     //
-    // MODULE: Run bwa/mem to map
+    // MODULE: Run SAMTOOLS_FAIDX
     //
-    BWA_MEM (
-        ch_input
+    Channel 
+        .fromPath("./params.outdir/")
+        .map { it -> ["fai", [it]] }
+        .set { fai_ch }
+
+    SAMTOOLS_FAIDX (
+        fasta_ch,
+        fai_ch
     )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+
+    //
+    // MODULE: Run FASTQ_ALIGN_BWA
+    //
+   Channel
+        .fromPath(ch_bwa_index)
+        .map { it -> ["[id:test_sample_T1, single_end:false]", [it]] }
+        .set { bwa_index_ch }
+
+    ch_genome_bam        = Channel.empty()
+
+    FASTQ_ALIGN_BWA (
+        INPUT_CHECK.out.reads,        // channel (mandatory): [ val(meta), [ path(reads) ] ]
+        BWA_INDEX.out.index,       // channel (mandatory): [ val(meta2), path(index) ]
+        true,    // boolean (mandatory): true or false
+        fasta_ch        // channel (optional) : [ path(fasta) ]
+    )
+    ch_genome_bam        = FASTQ_ALIGN_BWA.out.bam_orig
+
+    //
+    // MODULE: Run Pairtools/parse
+    //
+
+    PAIRTOOLS_PARSE (
+        ch_genome_bam,        //tuple val(meta), path(bam)
+        SAMTOOLS_FAIDX.out.fai            //path chromsizes
+    )
+
+    //
+    // MODULE: Run Pairtools/sort
+    //
+
+    PAIRTOOLS_SORT (
+        PAIRTOOLS_PARSE.out.pairsam
+    )
+
+    //
+    // MODULE: Run Pairtools/dedup
+    //
+
+    PAIRTOOLS_DEDUP (
+        PAIRTOOLS_SORT.out.sorted
+    )
+
+    //
+    // MODULE: Run PT_STATS_TABLE
+    //
+
+
+    PT_STATS_TABLE (
+        PAIRTOOLS_DEDUP.out.stat
+    )
+  
+
 
     //
     // MODULE: Run FastQC
