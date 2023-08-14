@@ -60,7 +60,7 @@ include { PAIRTOOLS_SORT              } from '../modules/nf-core/pairtools/sort/
 include { PAIRTOOLS_DEDUP             } from '../modules/nf-core/pairtools/dedup/main'
 include { BWA_MEM                     } from '../modules/nf-core/bwa/mem/main'
 include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main'
-include { FASTQ_ALIGN_BWA             } from '../subworkflows/nf-core/fastq_align_bwa/main'
+include { FASTQ_ALIGN_BWA             } from '../subworkflows/local/fastq_align_bwa/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -124,7 +124,8 @@ workflow HICQC {
         true,    // boolean (mandatory): true or false
         fasta_ch        // channel (optional) : [ path(fasta) ]
     )
-    ch_genome_bam        = FASTQ_ALIGN_BWA.out.bam_orig
+   ch_genome_bam        = FASTQ_ALIGN_BWA.out.bam_orig
+
 
     //
     // MODULE: Run Pairtools/parse
@@ -159,7 +160,7 @@ workflow HICQC {
     QCSTATS_TABLE (
         PAIRTOOLS_DEDUP.out.stat
     )
- 
+    ch_versions = ch_versions.mix(QCSTATS_TABLE.out.versions)
 
 
     //

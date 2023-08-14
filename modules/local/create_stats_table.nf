@@ -12,12 +12,18 @@ process QCSTATS_TABLE {
 
     output:
     path "*.stats.out.js"
+    path "versions.yml", emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
     mk_js_QC_summary.py -PTstats $pt_stats_file > ${prefix}.stats.out.js 
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 
 }
