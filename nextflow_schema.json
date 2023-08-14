@@ -28,6 +28,10 @@
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open"
                 },
+                "fasta": {
+                    "type": "string",
+                    "default": null
+                },
                 "email": {
                     "type": "string",
                     "description": "Email address for completion summary.",
@@ -41,13 +45,6 @@
                     "fa_icon": "fas fa-file-signature"
                 }
             }
-        },
-        "reference_genome_options": {
-            "title": "Reference genome options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
-            "properties": {}
         },
         "institutional_config_options": {
             "title": "Institutional config options",
@@ -239,9 +236,6 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/reference_genome_options"
         },
         {
             "$ref": "#/definitions/institutional_config_options"
