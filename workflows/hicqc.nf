@@ -40,7 +40,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
-include { PT_STATS_TABLE              } from '../modules/local/create_stats_table'
+include { QCSTATS_TABLE              } from '../modules/local/create_stats_table'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -152,11 +152,11 @@ workflow HICQC {
     )
 
     //
-    // MODULE: Run PT_STATS_TABLE
+    // MODULE: Run QCSTATS_TABLE
     //
 
 
-    PT_STATS_TABLE (
+    QCSTATS_TABLE (
         PAIRTOOLS_DEDUP.out.stat
     )
  

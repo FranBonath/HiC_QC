@@ -1,4 +1,4 @@
-process PT_STATS_TABLE {
+process QCSTATS_TABLE {
     tag "$meta.id"
     label 'process_single'
 
@@ -6,7 +6,7 @@ process PT_STATS_TABLE {
     tuple val(meta), path(pt_stats_file)
 
     output:
-    path "*.stats.out.txt"
+    path "*.stats.out.js"
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
