@@ -16,7 +16,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
-if (params.bwa_index) {ch_bwa_index = file(params.bwa_index)} else {exit 1, 'BWA index not specified!'}
+if (params.bwa_index) {ch_bwa_index = file(params.bwa_index)} else {'BWA index not specified!'}
 if (params.fasta) {ch_fasta = file(params.fasta)} else {exit 1, 'fasta file not specified!'}
 
 /*
@@ -83,17 +83,26 @@ workflow HICQC {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
  
     //
-    // MODULE: Run BWA_INDEX
+    // MODULE: Retrieve indexes or run BWA_INDEX
     //
- 
+    
     Channel 
         .fromPath(ch_fasta)
         .map { it -> ["[id:test_sample_T1, single_end:false]", [it]]}
         .set { fasta_ch }
-
-    BWA_INDEX (
-        fasta_ch //    tuple val(meta), path(fasta)
-    )
+    
+    if ( params.bwa_index ){
+        Channel
+            .fromPath(ch_bwa_index)
+            .map { it -> ["[id:test_sample_T1, single_end:false]", it] }
+            .set { bwa_index_ch }
+    }
+    else {
+        BWA_INDEX (
+            fasta_ch //    tuple val(meta), path(fasta)
+        )
+        bwa_index_ch = BWA_INDEX.out.index
+    }
 
     //
     // MODULE: Run SAMTOOLS_FAIDX
@@ -111,16 +120,10 @@ workflow HICQC {
     //
     // MODULE: Run FASTQ_ALIGN_BWA
     //
-   Channel
-        .fromPath(ch_bwa_index)
-        .map { it -> ["[id:test_sample_T1, single_end:false]", [it]] }
-        .set { bwa_index_ch }
-
     ch_genome_bam        = Channel.empty()
-
     FASTQ_ALIGN_BWA (
         INPUT_CHECK.out.reads,        // channel (mandatory): [ val(meta), [ path(reads) ] ]
-        BWA_INDEX.out.index,       // channel (mandatory): [ val(meta2), path(index) ]
+        bwa_index_ch,   // channel (mandatory): [ val(meta2), path(index) ]
         true,    // boolean (mandatory): true or false
         fasta_ch        // channel (optional) : [ path(fasta) ]
     )
