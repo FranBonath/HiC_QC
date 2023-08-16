@@ -40,7 +40,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
-include { QCSTATS_TABLE              } from '../modules/local/create_stats_table'
+include { QCSTATS_TABLE               } from '../modules/local/create_stats_table'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,20 +81,20 @@ workflow HICQC {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
- 
+
     //
     // MODULE: Retrieve indexes or run BWA_INDEX
     //
     
     Channel 
         .fromPath(ch_fasta)
-        .map { it -> ["[id:test_sample_T1, single_end:false]", [it]]}
+        .map { it -> ["[:]", [it]]}
         .set { fasta_ch }
     
     if ( params.bwa_index ){
         Channel
             .fromPath(ch_bwa_index)
-            .map { it -> ["[id:test_sample_T1, single_end:false]", it] }
+            .map { it -> ["[:]", it] }
             .set { bwa_index_ch }
     }
     else {
@@ -107,6 +107,7 @@ workflow HICQC {
     //
     // MODULE: Run SAMTOOLS_FAIDX
     //
+
     Channel 
         .fromPath("./params.outdir/")
         .map { it -> ["fai", [it]] }
@@ -120,6 +121,7 @@ workflow HICQC {
     //
     // MODULE: Run FASTQ_ALIGN_BWA
     //
+
     ch_genome_bam        = Channel.empty()
     FASTQ_ALIGN_BWA (
         INPUT_CHECK.out.reads,        // channel (mandatory): [ val(meta), [ path(reads) ] ]
@@ -159,7 +161,6 @@ workflow HICQC {
     // MODULE: Run QCSTATS_TABLE
     //
 
-
     QCSTATS_TABLE (
         PAIRTOOLS_DEDUP.out.stat
     )
@@ -169,6 +170,7 @@ workflow HICQC {
     //
     // MODULE: Run FastQC
     //
+    
     FASTQC (
         INPUT_CHECK.out.reads
     )
