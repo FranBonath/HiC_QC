@@ -41,6 +41,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
 include { QCSTATS_TABLE               } from '../modules/local/create_stats_table'
+include { MQC_TABLES                  } from '../modules/local/create_mqc_tables'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,19 +90,21 @@ workflow HICQC {
     Channel 
         .fromPath(ch_fasta)
         .map { it -> ["[:]", [it]]}
+        .collect()
         .set { fasta_ch }
     
     if ( params.bwa_index ){
         Channel
             .fromPath(ch_bwa_index)
             .map { it -> ["[:]", it] }
+            .collect()
             .set { bwa_index_ch }
     }
     else {
         BWA_INDEX (
             fasta_ch //    tuple val(meta), path(fasta)
         )
-        bwa_index_ch = BWA_INDEX.out.index
+        bwa_index_ch = BWA_INDEX.out.index.collect()
     }
 
     //
@@ -129,16 +132,14 @@ workflow HICQC {
         true,    // boolean (mandatory): true or false
         fasta_ch        // channel (optional) : [ path(fasta) ]
     )
-   ch_genome_bam        = FASTQ_ALIGN_BWA.out.bam_orig
-
 
     //
     // MODULE: Run Pairtools/parse
     //
 
     PAIRTOOLS_PARSE (
-        ch_genome_bam,        //tuple val(meta), path(bam)
-        SAMTOOLS_FAIDX.out.fai            //path chromsizes
+        FASTQ_ALIGN_BWA.out.bam_orig,        //tuple val(meta), path(bam)
+        SAMTOOLS_FAIDX.out.fai.collect()            //path chromsizes
     )
 
     //
@@ -166,6 +167,16 @@ workflow HICQC {
     )
     ch_versions = ch_versions.mix(QCSTATS_TABLE.out.versions)
 
+    //
+    // MODULE: Run QCSTATS_TABLE
+    //
+    ch_mqc_tables = Channel.empty()
+    ch_mqc_tables = ch_mqc_tables.mix(QCSTATS_TABLE.out.qctable.collect())
+
+  //  MQC_TABLES (
+        
+ //   )
+
 
     //
     // MODULE: Run FastQC
@@ -179,7 +190,7 @@ workflow HICQC {
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-
+/*
     //
     // MODULE: MultiQC
     //
@@ -194,6 +205,7 @@ workflow HICQC {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(QCSTATS_TABLE.out.qctable.collect())
 
     MULTIQC (
         ch_multiqc_files.collect(),
@@ -202,7 +214,9 @@ workflow HICQC {
         ch_multiqc_logo.toList()
     )
     multiqc_report = MULTIQC.out.report.toList()
+*/
 }
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

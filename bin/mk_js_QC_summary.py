@@ -49,7 +49,7 @@ for stat in pt_stats_dict:
     else:
         pt_stats_percent_of_nodup[stat] = 0
 
-# create .json file
+# create total results .json file
 pt_stats_json = {
     "samples": [
         {

@@ -13,12 +13,12 @@ workflow FASTQ_ALIGN_BWA {
 
     main:
     ch_versions = Channel.empty()
-
     //
     // Map reads with BWA
     //
 
     BWA_MEM ( ch_reads, ch_index, val_sort_bam )
+
     ch_versions = ch_versions.mix(BWA_MEM.out.versions.first())
 
     emit:
