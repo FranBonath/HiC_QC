@@ -174,14 +174,13 @@ workflow HICQC {
     ch_mqc_tables = Channel.empty()
     ch_mqc_tables = QCSTATS_TABLE.out.qctable
 
-    ch_mqc_tables.view()
-
     MQC_TABLES (
         ch_mqc_tables
     )
 
-    MQC_TABLES.out.mqc_done.view()
+    ch_versions = ch_versions.mix(MQC_TABLES.out.versions)
 
+    MQC_TABLES.out.mqc_done.collect().view()
 
     //
     // MODULE: Run FastQC
@@ -192,7 +191,7 @@ workflow HICQC {
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
-/*
+
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
@@ -211,7 +210,8 @@ workflow HICQC {
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(QCSTATS_TABLE.out.qctable.collect())
+    //ch_multiqc_files = ch_multiqc_files.mix(QCSTATS_TABLE.out.qctable.collect())
+    ch_multiqc_files = ch_multiqc_files.mix(MQC_TABLES.out.mqc_done.collect())
 
     MULTIQC (
         ch_multiqc_files.collect(),
@@ -220,7 +220,7 @@ workflow HICQC {
         ch_multiqc_logo.toList()
     )
     multiqc_report = MULTIQC.out.report.toList()
-*/
+
 }
 
 
