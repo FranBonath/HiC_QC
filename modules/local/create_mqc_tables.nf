@@ -11,17 +11,20 @@ process MQC_TABLES {
     tuple val(meta), path(js_stats_file)
 
     output:
-    tuple val(meta), path(js_stats_file), emit: mqc_done
+    tuple val(meta), path(mqc_tables), emit: mqc_done
  //   path "mqc_tables", emit: mqc_tables // path to directory with MultiQC tables
   //  path "versions.yml", emit: versions
 
     script:
+    println(js_stats_file)
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
-    mkdir mqc_tables
+    pwd
+    mkdir -p mqc_tables
     cd mqc_tables
     create_mqc_output_tables.py -js_file ../$js_stats_file
+    pwd
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
