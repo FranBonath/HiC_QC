@@ -10,15 +10,15 @@ process QCSTATS_TABLE {
     input:
     tuple val(meta), path(pt_stats_file)
 
-     output:
-    path "*.stats.out_mqc.json", emit: qctable
+    output:
+    tuple val(meta), path("*.stats.out.js"), emit: qctable
     path "versions.yml", emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
 
     """
-    mk_js_QC_summary.py -PTstats $pt_stats_file > ${prefix}.stats.out_mqc.json 
+    mk_js_QC_summary.py -PTstats $pt_stats_file > ${prefix}.stats.out.js 
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

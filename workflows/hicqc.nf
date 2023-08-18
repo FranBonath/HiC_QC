@@ -168,14 +168,19 @@ workflow HICQC {
     ch_versions = ch_versions.mix(QCSTATS_TABLE.out.versions)
 
     //
-    // MODULE: Run QCSTATS_TABLE
+    // MODULE: Run MQC_TABLES
     //
-    ch_mqc_tables = Channel.empty()
-    ch_mqc_tables = ch_mqc_tables.mix(QCSTATS_TABLE.out.qctable.collect())
 
-  //  MQC_TABLES (
-        
- //   )
+    ch_mqc_tables = Channel.empty()
+    ch_mqc_tables = QCSTATS_TABLE.out.qctable
+
+    ch_mqc_tables.view()
+
+    MQC_TABLES (
+        ch_mqc_tables
+    )
+
+    MQC_TABLES.out.mqc_done.view()
 
 
     //
@@ -187,10 +192,11 @@ workflow HICQC {
     )
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
+/*
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-/*
+
     //
     // MODULE: MultiQC
     //

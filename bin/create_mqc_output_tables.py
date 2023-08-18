@@ -8,9 +8,18 @@ import json
 parser = argparse.ArgumentParser(description="generate output table to use in MultiQC report generation")
 
 # import counts from Pairtools stats output (-PT.stats.txt) from command line argument
-parser.add_argument("-json", help="list of .json files outputted by md_js_QC_summary.py")
+parser.add_argument("-js_file", help="list of .json files outputted by md_js_QC_summary.py")
 args = parser.parse_args()
 
+# extract information (read pairs = rp) and put it in a dictionary
+js_stats_dict = {}
+
+json_file = open(args.js_file)
+json_data = json.load(json_file)
+
+for i in json_data["samples"]:
+    sample_name = i["sample name"]
+    basic_data = {"sample": i["sample name"]}
 
 # create basic reads stat .json file
 
@@ -37,3 +46,12 @@ args = parser.parse_args()
 # create trans read pairs .json file
 
 # create valid read pairs .json file
+
+
+# print table to terminal and save .json to file
+json_basic_out = json.dumps(basic_data, indent=2)
+json_basic_out_file = sample_name + "basic_stats.json"
+basic_outfile = open(json_basic_out_file, "w")
+basic_outfile.write(json_basic_out)
+
+print(json_basic_out)

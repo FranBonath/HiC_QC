@@ -8,11 +8,12 @@ process MQC_TABLES {
         'quay.io/biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(js_stats_files)
+    tuple val(meta), path(js_stats_file)
 
     output:
-    path "mqc_tables", emit: mqc_tables // path to directory with MultiQC tables
-    path "versions.yml", emit: versions
+    tuple val(meta), path(js_stats_file), emit: mqc_done
+ //   path "mqc_tables", emit: mqc_tables // path to directory with MultiQC tables
+  //  path "versions.yml", emit: versions
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
@@ -20,7 +21,7 @@ process MQC_TABLES {
     """
     mkdir mqc_tables
     cd mqc_tables
-    create_mqc_output_tables.py -json $js_stats_files
+    create_mqc_output_tables.py -js_file ../$js_stats_file
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
