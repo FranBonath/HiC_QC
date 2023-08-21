@@ -11,7 +11,7 @@ process QCSTATS_TABLE {
     tuple val(meta), path(pt_stats_file)
 
     output:
-    tuple val(meta), path("*.stats.out.js"), emit: qctable
+    path "*.stats.out.js", emit: qctable
     path "versions.yml", emit: versions
 
     script:

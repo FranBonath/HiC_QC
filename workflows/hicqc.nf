@@ -170,9 +170,10 @@ workflow HICQC {
     //
     // MODULE: Run MQC_TABLES
     //
-
+    QCSTATS_TABLE.out.qctable.collect().view()
     ch_mqc_tables = Channel.empty()
-    ch_mqc_tables = QCSTATS_TABLE.out.qctable
+    ch_mqc_tables = QCSTATS_TABLE.out.qctable.collect()
+
 
     MQC_TABLES (
         ch_mqc_tables

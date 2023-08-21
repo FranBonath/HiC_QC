@@ -1,5 +1,5 @@
 process MQC_TABLES {
-    tag "$meta.id"
+  //  tag "$meta.id"
     label 'process_single'
     
     conda "bioconda::python=3.9"
@@ -8,19 +8,21 @@ process MQC_TABLES {
         'quay.io/biocontainers/python:3.9' }"
 
     input:
-    tuple val(meta), path(js_stats_file)
+    val js_stats_file
 
     output:
     path out_dir_name, emit: mqc_done
     path "versions.yml", emit: versions
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    out_dir_name = "${prefix}_mqc_tables"
+  //  def prefix = task.ext.prefix ?: "${meta.id}"
+ //   out_dir_name = "${prefix}_mqc_tables"
+    out_dir_name = "mqc_table"
     """
     mkdir -p ${out_dir_name}
     cd ${out_dir_name}
-    create_mqc_output_tables.py -js_file ../$js_stats_file
+    echo $js_stats_file | sed 's/\\[//' | sed 's/\\]//' | sed 's/, /\\n/g' > input_stats_file.txt
+    create_mqc_output_tables.py -js_file input_stats_file.txt
     cd ..
 
     cat <<-END_VERSIONS > versions.yml

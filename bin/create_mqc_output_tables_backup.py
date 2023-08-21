@@ -11,47 +11,21 @@ parser = argparse.ArgumentParser(description="generate output table to use in Mu
 parser.add_argument("-js_file", help="list of .json files outputted by md_js_QC_summary.py")
 args = parser.parse_args()
 
-# define output tables
-json_files = open(args.js_file, "r").readlines()
-basic_data = {
-    "plot_type": "table",
-    "section_name": "Basic Reads Statistic",
-    "description": "Reads per sample, reads mapping to the provided genome, duplicated reads based on pairtools and non-duplicated and mapped reads.",
-    "data": {},
-}
 
-cis_rp_data = {
-    "plot_type": "table",
-    "section_name": "Cis Read Pairs",
-    "description": "Reads in the pair are located on the same chromosome. Cis read pairs are further defined by the distance between the reads in base pairs.",
-    "data": {},
-}
+js_stats_dict = {}
 
-trans_rp_data = {
-    "plot_type": "table",
-    "section_name": "Trans Read Pairs",
-    "description": "Reads in the pairs are located on different chromosomes",
-    "data": {},
-}
+json_file = open(args.js_file)
+json_data = json.load(json_file)
 
-valid_rp_data = {
-    "plot_type": "table",
-    "section_name": "Valid Read Pairs",
-    "description": "Valid read pairs are comprised of cis read pairs > 1kb and trans read pairs",
-    "data": {},
-}
+for i in json_data["samples"]:
+    sample_name = i["sample name"]
 
-# iterate through the different json files and extract info
-for json_file_single in json_files:
-    js_stats_dict = {}
-    json_file = open(json_file_single.rstrip())
-    json_data = json.load(json_file)
-
-    for i in json_data["samples"]:
-        sample_name = i["sample name"]
-
-        # extract information (read pairs = rp) and put it in a dictionary
-        basic_data_single = {
+    # extract information (read pairs = rp) and put it in a dictionary
+    basic_data = {
+        "plot_type": "table",
+        "section_name": "Basic Reads Statistic",
+        "description": "Reads per sample, reads mapping to the provided genome, duplicated reads based on pairtools and non-duplicated and mapped reads.",
+        "data": {
             i["sample name"]: {
                 "total": i["total reads"]["reads"],
                 "mapped (% of total)": str(i["mapped reads"]["reads"])
@@ -66,12 +40,15 @@ for json_file_single in json_files:
                 + " ("
                 + str(i["non-duplicated mapped reads"]["percent of total"])
                 + ")",
-            },
-        }
-        basic_data["data"][i["sample name"]] = basic_data_single[i["sample name"]]
-
-        # create cis read pairs .json file
-        cis_rp_data_single = {
+            }
+        },
+    }
+    # create cis read pairs .json file
+    cis_rp_data = {
+        "plot_type": "table",
+        "section_name": "Cis Read Pairs",
+        "description": "Reads in the pair are located on the same chromosome. Cis read pairs are further defined by the distance between the reads in base pairs.",
+        "data": {
             i["sample name"]: {
                 "total (%total/ %valid/ %nodup)": str(i["cis read pairs"]["total cis"]["reads"])
                 + " ("
@@ -105,30 +82,36 @@ for json_file_single in json_files:
                 + " / "
                 + str(i["cis read pairs"]["cis >= 10 kb"]["percent of nodup"])
                 + ")",
-            },
-        }
-        cis_rp_data["data"][i["sample name"]] = cis_rp_data_single[i["sample name"]]
-
-        # create trans read pairs .json file
-
-        trans_rp_data_single = {
+            }
+        },
+    }
+    # create trans read pairs .json file
+    trans_rp_data = {
+        "plot_type": "table",
+        "section_name": "Trans Read Pairs",
+        "description": "Reads in the pairs are located on different chromosomes",
+        "data": {
             i["sample name"]: {
                 "trans rp, reads": str(i["trans read pairs"]["reads"]),
                 "trans rp, %total": str(i["trans read pairs"]["percent of total"]),
                 "trans rp, %valid": str(i["trans read pairs"]["percent of valid"]),
                 "trans rp, %nodup": str(i["trans read pairs"]["percent of nodup"]),
             },
-        }
-        trans_rp_data["data"][i["sample name"]] = trans_rp_data_single[i["sample name"]]
-
-        # create valid read pairs .json file
-        valid_rp_data_single = {
+        },
+    }
+    # create valid read pairs .json file
+    cis_rp_data = {
+        "plot_type": "table",
+        "section_name": "Valid Read Pairs",
+        "description": "Valid read pairs are comprised of cis read pairs > 1kb and trans read pairs",
+        "data": {
             i["sample name"]: {
                 "val rp, reads)": str(i["valid read pairs (cis above 1kb + trans)"]["reads"]),
                 "val rp, %total": str(i["valid read pairs (cis above 1kb + trans)"]["percent of total"]),
                 "val rp, %nodup": str(i["valid read pairs (cis above 1kb + trans)"]["percent of nodup"]),
-            },
-        }
+            }
+        },
+    }
 
 
 # print table to terminal and save .json to file
