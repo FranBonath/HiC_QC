@@ -129,13 +129,14 @@ for json_file_single in json_files:
                 "val rp, %nodup": str(i["valid read pairs (cis above 1kb + trans)"]["percent of nodup"]),
             },
         }
+        valid_rp_data["data"][i["sample name"]] = valid_rp_data_single[i["sample name"]]
 
 
 # print table to terminal and save .json to file
 json_basic_out = json.dumps(basic_data, indent=2)
 json_cis_rp_out = json.dumps(cis_rp_data, indent=2)
 json_trans_rp_out = json.dumps(trans_rp_data, indent=2)
-json_valid_out = json.dumps(cis_rp_data, indent=2)
+json_valid_out = json.dumps(valid_rp_data, indent=2)
 
 json_basic_out_file = sample_name + "_basic_stats_mqc.json"
 basic_outfile = open(json_basic_out_file, "w")
