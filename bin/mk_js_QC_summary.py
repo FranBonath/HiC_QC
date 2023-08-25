@@ -55,55 +55,55 @@ pt_stats_json = {
         {
             "sample name": sample_name,
             "total reads": {
-                "reads": "{:,}".format(pt_stats_dict["total"]),
+                "reads": pt_stats_dict["total"],
                 "percent of total": pt_stats_percent_of_total["total"],
             },
             "mapped reads": {
-                "reads": "{:,}".format(pt_stats_dict["total_mapped"]),
+                "reads": pt_stats_dict["total_mapped"],
                 "percent of total": pt_stats_percent_of_total["total_mapped"],
             },
             "duplicated reads": {
-                "reads": "{:,}".format(pt_stats_dict["total_dups"]),
+                "reads": pt_stats_dict["total_dups"],
                 "percent of total": pt_stats_percent_of_total["total_dups"],
             },
             "non-duplicated mapped reads": {
-                "reads": "{:,}".format(pt_stats_dict["total_nodups"]),
+                "reads": pt_stats_dict["total_nodups"],
                 "percent of total": pt_stats_percent_of_total["total_nodups"],
                 "percent of nodup": pt_stats_percent_of_nodup["total_nodups"],
             },
             "valid read pairs (cis above 1kb + trans)": {
-                "reads": "{:,}".format(valid_rp),
+                "reads": valid_rp,
                 "percent of total": pt_stats_percent_of_total["valid_rp"],
                 "percent of valid": pt_stats_percent_of_valid_rp["valid_rp"],
                 "percent of nodup": pt_stats_percent_of_nodup["valid_rp"],
             },
             "trans read pairs": {
-                "reads": "{:,}".format(pt_stats_dict["trans"]),
+                "reads": pt_stats_dict["trans"],
                 "percent of total": pt_stats_percent_of_total["trans"],
                 "percent of valid": pt_stats_percent_of_valid_rp["trans"],
                 "percent of nodup": pt_stats_percent_of_nodup["trans"],
             },
             "cis read pairs": {
                 "total cis": {
-                    "reads": "{:,}".format(pt_stats_dict["cis"]),
+                    "reads": pt_stats_dict["cis"],
                     "percent of total": pt_stats_percent_of_total["cis"],
                     "percent of valid": pt_stats_percent_of_valid_rp["cis"],
                     "percent of nodup": pt_stats_percent_of_nodup["cis"],
                 },
                 "cis below 1 kb": {
-                    "reads": "{:,}".format(pt_stats_dict["cis_below_1kb"]),
+                    "reads": pt_stats_dict["cis_below_1kb"],
                     "percent of total": pt_stats_percent_of_total["cis_below_1kb"],
                     "percent of valid": pt_stats_percent_of_valid_rp["cis_below_1kb"],
                     "percent of nodup": pt_stats_percent_of_nodup["cis_below_1kb"],
                 },
                 "cis >= 1 kb": {
-                    "reads": "{:,}".format(pt_stats_dict["cis_1kb+"]),
+                    "reads": pt_stats_dict["cis_1kb+"],
                     "percent of total": pt_stats_percent_of_total["cis_1kb+"],
                     "percent of valid": pt_stats_percent_of_valid_rp["cis_1kb+"],
                     "percent of nodup": pt_stats_percent_of_nodup["cis_1kb+"],
                 },
                 "cis >= 10 kb": {
-                    "reads": "{:,}".format(pt_stats_dict["cis_10kb+"]),
+                    "reads": pt_stats_dict["cis_10kb+"],
                     "percent of total": pt_stats_percent_of_total["cis_10kb+"],
                     "percent of valid": pt_stats_percent_of_valid_rp["cis_10kb+"],
                     "percent of nodup": pt_stats_percent_of_nodup["cis_10kb+"],

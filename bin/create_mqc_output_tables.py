@@ -14,6 +14,7 @@ args = parser.parse_args()
 # define output tables
 json_files = open(args.js_file, "r").readlines()
 basic_data = {
+    "id": "custom_table_basic",
     "plot_type": "table",
     "section_name": "Basic Reads Statistic",
     "description": "Reads per sample, reads mapping to the provided genome, duplicated reads based on pairtools and non-duplicated and mapped reads.",
@@ -21,6 +22,7 @@ basic_data = {
 }
 
 cis_rp_data = {
+    "id": "custom_table_cis_rp",
     "plot_type": "table",
     "section_name": "Cis Read Pairs",
     "description": "Reads in the pair are located on the same chromosome. Cis read pairs are further defined by the distance between the reads in base pairs.",
@@ -28,6 +30,7 @@ cis_rp_data = {
 }
 
 trans_rp_data = {
+    "id": "custom_table_trans_rp",
     "plot_type": "table",
     "section_name": "Trans Read Pairs",
     "description": "Reads in the pairs are located on different chromosomes",
@@ -35,9 +38,22 @@ trans_rp_data = {
 }
 
 valid_rp_data = {
+    "id": "custom_table_valid_rp",
     "plot_type": "table",
     "section_name": "Valid Read Pairs",
     "description": "Valid read pairs are comprised of cis read pairs > 1kb and trans read pairs",
+    "data": {},
+}
+
+barplot_data = {
+    "id": "custom_data_basic_bargraph",
+    "plot_type": "bargraph",
+    "section_name": "Overview HiC reads",
+    "description": "Graphic representation of reads lost to mapping, de-duplication and short-distance",
+    "pconfig": {
+        "id": "custom_data_bargraph",
+        "stacking": None,
+    },
     "data": {},
 }
 
@@ -51,9 +67,19 @@ for json_file_single in json_files:
         sample_name = i["sample name"]
 
         # extract information (read pairs = rp) and put it in a dictionary
+        barplot_data_single = {
+            i["sample name"]: {
+                "total": float(i["total reads"]["reads"]),
+                "mapped": float(i["mapped reads"]["reads"]),
+                "duplicates": float(i["duplicated reads"]["reads"]),
+                "valid": float(i["valid read pairs (cis above 1kb + trans)"]["reads"]),
+            },
+        }
+        barplot_data["data"][i["sample name"]] = barplot_data_single[i["sample name"]]
+
         basic_data_single = {
             i["sample name"]: {
-                "total": i["total reads"]["reads"],
+                "total": str(i["total reads"]["reads"]),
                 "mapped (% of total)": str(i["mapped reads"]["reads"])
                 + " ("
                 + str(i["mapped reads"]["percent of total"])
@@ -137,6 +163,11 @@ json_basic_out = json.dumps(basic_data, indent=2)
 json_cis_rp_out = json.dumps(cis_rp_data, indent=2)
 json_trans_rp_out = json.dumps(trans_rp_data, indent=2)
 json_valid_out = json.dumps(valid_rp_data, indent=2)
+json_barplot_out = json.dumps(barplot_data, indent=2)
+
+json_barplot_out_file = sample_name + "_barplot_stats_mqc.json"
+barplot_outfile = open(json_barplot_out_file, "w")
+barplot_outfile.write(json_barplot_out)
 
 json_basic_out_file = sample_name + "_basic_stats_mqc.json"
 basic_outfile = open(json_basic_out_file, "w")
