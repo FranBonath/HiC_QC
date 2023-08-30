@@ -48,11 +48,22 @@ valid_rp_data = {
 barplot_data = {
     "id": "custom_data_basic_bargraph",
     "plot_type": "bargraph",
-    "section_name": "Overview HiC reads",
-    "description": "Graphic representation of reads lost to mapping, de-duplication and short-distance",
+    "section_name": "Overview QC filter HiC reads",
+    "description": "Graphic representation of reads after mapping, de-duplication and distance filtering",
     "pconfig": {
         "id": "custom_data_bargraph",
         "stacking": None,
+    },
+    "data": {},
+}
+
+barplot_rp_data = {
+    "id": "custom_data_rp_bargraph",
+    "plot_type": "bargraph",
+    "section_name": "composition of valid reads",
+    "description": "valid reads are defines as trans reads and cis reads >= 1kb",
+    "pconfig": {
+        "id": "custom_data_rp_bargraph",
     },
     "data": {},
 }
@@ -71,11 +82,20 @@ for json_file_single in json_files:
             i["sample name"]: {
                 "total": float(i["total reads"]["reads"]),
                 "mapped": float(i["mapped reads"]["reads"]),
-                "duplicates": float(i["duplicated reads"]["reads"]),
+                "de-duplicated": float(i["non-duplicated mapped reads"]["reads"]),
                 "valid": float(i["valid read pairs (cis above 1kb + trans)"]["reads"]),
             },
         }
         barplot_data["data"][i["sample name"]] = barplot_data_single[i["sample name"]]
+
+        barplot_data_rp_single = {
+            i["sample name"]: {
+                "trans": float(i["trans read pairs"]["reads"]),
+                "cis > 1kb to 10kb": float(i["cis read pairs"]["cis below 1 kb"]["reads"]),
+                "cis > 10kb": float(i["cis read pairs"]["cis >= 10 kb"]["reads"]),
+            },
+        }
+        barplot_rp_data["data"][i["sample name"]] = barplot_data_rp_single[i["sample name"]]
 
         basic_data_single = {
             i["sample name"]: {
@@ -164,10 +184,16 @@ json_cis_rp_out = json.dumps(cis_rp_data, indent=2)
 json_trans_rp_out = json.dumps(trans_rp_data, indent=2)
 json_valid_out = json.dumps(valid_rp_data, indent=2)
 json_barplot_out = json.dumps(barplot_data, indent=2)
+json_barplot_rp_out = json.dumps(barplot_rp_data, indent=2)
+
 
 json_barplot_out_file = sample_name + "_barplot_stats_mqc.json"
 barplot_outfile = open(json_barplot_out_file, "w")
 barplot_outfile.write(json_barplot_out)
+
+json_barplot_rp_out_file = sample_name + "_barplot_stats_rp_mqc.json"
+barplot_rp_outfile = open(json_barplot_rp_out_file, "w")
+barplot_rp_outfile.write(json_barplot_rp_out)
 
 json_basic_out_file = sample_name + "_basic_stats_mqc.json"
 basic_outfile = open(json_basic_out_file, "w")
